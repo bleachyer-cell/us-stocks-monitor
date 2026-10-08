@@ -48,6 +48,35 @@ h1{font-size:22px;line-height:1.3;margin:3px 0 0;letter-spacing:-.035em}
 .region-meta{margin-left:9px;color:#8199ba;font-size:11px;font-weight:400}
 .region-chip{display:inline-block;margin-left:8px;padding:1px 6px;background:#172d49;color:#83adf1;border:1px solid #2e4e73;border-radius:5px;font-weight:500;font-size:10px;vertical-align:3px}
 @media(max-width:800px){.asia-panel{padding-top:22px;margin-top:28px}.asia-title{font-size:20px}.region-hd{padding:10px 16px}}
+
+/* Google Finance intraday sparklines and expanded price chart */
+.chart-mini{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:45px;margin-top:1px;padding:9px 0 0;border-top:1px solid #213249;cursor:zoom-in}
+.chart-mini-label{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.chart-mini-title{font-size:11px;color:#9bafca;font-weight:680}
+.chart-mini-sub{font-size:11px;color:#7c8faa}
+.chart-open{border:1px solid #344765;background:#1b2a42;color:#afcaf0;font-size:11px;padding:5px 9px;border-radius:7px;cursor:pointer;font-family:inherit}
+.chart-open:hover{background:#263c5a;border-color:#6593c1}
+.chart-mini-graph{height:48px;width:190px;max-width:48%;position:relative;flex-shrink:0;color:#748ca7;font-size:11px;text-align:center}
+.spark-svg{display:block;width:100%;height:100%;overflow:visible}
+.chart-mini-error{display:grid;align-items:center;color:#d39e70}
+.chart-warning{position:absolute;top:-3px;right:0;font-size:10px;color:#ffc87d}
+#chart-dialog{width:min(920px,calc(100vw - 24px));max-width:none;border:1px solid #334966;border-radius:19px;padding:0;background:#111a2c;color:#e9f1ff;box-shadow:0 35px 85px #0009}
+#chart-dialog::backdrop{background:#040813dc}
+.chart-dialog-shell{padding:23px}
+.chart-dialog-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.chart-dialog-kicker{font-size:11px;color:#86b8f8;letter-spacing:.09em;font-weight:770}
+.chart-dialog-title{font-size:23px;font-weight:790;margin-top:5px}
+.chart-close{border:1px solid #354762;border-radius:9px;color:#d4e4fb;background:#20314a;font-size:27px;width:36px;height:36px;line-height:24px;cursor:pointer}
+.chart-range{display:flex;gap:8px;margin-top:18px;margin-bottom:18px}
+.chart-range button{background:#1b2a41;border:1px solid #324561;border-radius:9px;padding:8px 11px;color:#91a7c5;cursor:pointer;font:inherit;font-size:12px}
+.chart-range button.selected{background:#254b79;color:#f1f7ff;border-color:#4380bd}
+.chart-plot{position:relative;min-height:260px;background:#0b1321;border:1px solid #233550;border-radius:13px;padding:10px 5px 0;overflow:hidden}
+.chart-plot svg{width:100%;height:290px;display:block;touch-action:pan-y}
+.chart-wait{display:grid;place-items:center;min-height:250px;text-align:center;color:#93a7c3;font-size:13px;padding:20px}
+.chart-wait-error{color:#eeb2a0}
+.chart-tooltip{position:absolute;top:6px;padding:6px 9px;background:#1c2d49;border:1px solid #526783;border-radius:8px;color:#e9f2ff;font-size:11px;pointer-events:none;white-space:nowrap;z-index:2}
+.chart-dialog-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:13px;margin-top:14px;color:#93a7c0;font-size:12px}
+@media(max-width:800px){.chart-mini{gap:8px}.chart-mini-graph{width:145px;max-width:47%}.chart-mini-label{gap:5px}.chart-open{font-size:10px}#chart-dialog{width:calc(100vw - 16px)}.chart-dialog-shell{padding:15px}.chart-dialog-title{font-size:18px}.chart-plot{padding:5px 0 0}.chart-plot svg{height:240px}.chart-dialog-foot{font-size:10px}}
 </style></head>
 <body><main class="wrap">
 <header class="top"><div class="identity"><div class="logo">↗</div><div><div class="kicker">MARKET MONITOR / US</div><h1>美股行情监控</h1></div></div><div class="live"><span class="pulse"></span><span id="state">正在连接 Google Finance</span></div></header>
@@ -136,4 +165,5 @@ $('rows').innerHTML=Array.from({length:8},(_,i)=>'<div class="stock"><div class=
 schedule();load();
 </script>
 <script src="/asia.js"></script>
+<script src="/charts.js"></script>
 </body></html>
