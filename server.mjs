@@ -104,6 +104,11 @@ http.createServer(async(req,res)=>{
     try{return json(200,await fetchHistory(stock[0],stock[2],range));}
     catch(e){return json(503,{error:String(e.message||e),symbol,range});}
   }
+  if(pathname==='/charts.js'){
+    try{const content=await readFile(path.join(ROOT,'public','charts.js'));res.writeHead(200,{'content-type':'application/javascript; charset=utf-8','cache-control':'no-cache','x-content-type-options':'nosniff'});res.end(content);}
+    catch{res.writeHead(500);res.end('Price chart script unavailable');}
+    return;
+  }
   if(pathname==='/asia.js'){
     try{const content=await readFile(path.join(ROOT,'public','asia.js'));res.writeHead(200,{'content-type':'application/javascript; charset=utf-8','cache-control':'no-cache','x-content-type-options':'nosniff'});res.end(content);}
     catch{res.writeHead(500);res.end('Asia script unavailable');}
