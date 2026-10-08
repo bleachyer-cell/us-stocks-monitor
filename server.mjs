@@ -95,6 +95,11 @@ http.createServer(async(req,res)=>{
   if(pathname==='/api/health')return json(200,{ok:true,count:stocks.length+asiaStocks.length,usCount:stocks.length,asiaCount:asiaStocks.length});
   if(pathname==='/api/quotes'){try{return json(200,await getAll());}catch{return json(503,{error:'美股行情抓取暂不可用'});}}
   if(pathname==='/api/asia'){try{return json(200,await getAsia());}catch{return json(503,{error:'亚洲行情抓取暂不可用'});}}
+  if(pathname==='/asia.js'){
+    try{const content=await readFile(path.join(ROOT,'public','asia.js'));res.writeHead(200,{'content-type':'application/javascript; charset=utf-8','cache-control':'no-cache','x-content-type-options':'nosniff'});res.end(content);}
+    catch{res.writeHead(500);res.end('Asia script unavailable');}
+    return;
+  }
   if(pathname==='/'||pathname==='/index.html'){
     try{const content=await readFile(path.join(ROOT,'public','index.html'));res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-cache','x-content-type-options':'nosniff'});res.end(content);}
     catch{res.writeHead(500);res.end('Page unavailable');}
