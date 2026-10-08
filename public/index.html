@@ -2,7 +2,7 @@
 <html lang="zh-CN"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080d18"><meta name="description" content="Google Finance 美股价格监控，最新价、较昨收、较开盘。">
-<title>美股行情 · Google Finance</title>
+<title>美股与亚洲关联股行情 · Google Finance</title>
 <style>
 :root{color-scheme:dark;--bg:#080d18;--panel:#111929;--panel2:#151f32;--border:#253148;--muted:#8d9bb3;--text:#eef4ff;--green:#3bddaa;--red:#ff748b;--blue:#79acff;}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse 900px 540px at 80% -150px,#18335b 0,transparent 76%),var(--bg);font:15px/1.5 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft Yahei",sans-serif;color:var(--text);}
@@ -37,6 +37,17 @@ h1{font-size:22px;line-height:1.3;margin:3px 0 0;letter-spacing:-.035em}
 .notice{font-size:12px;color:#8da0bb;margin:15px 2px 0;line-height:1.7}.status{color:#8ca2bc;font-size:12px;margin-top:9px}.warn{color:#ffd38f}.error{color:var(--red)}.footer{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-top:25px;color:#697b96;font-size:12px}
 @media(max-width:800px){.wrap{width:min(100% - 28px,680px);padding-top:24px}.top{margin-bottom:19px}.subtitle{font-size:12px}.metrics{gap:8px}.metric{padding:14px;min-height:93px}.m-value{font-size:22px}.thead{display:none}.stock{grid-template-columns:1fr 1fr;row-gap:13px;padding:17px 16px}.stock .namecol{grid-column:1;grid-row:1}.stock .pricecol{grid-column:2;grid-row:1;text-align:right}.stock .closecol{grid-column:1;grid-row:2}.stock .opencol{grid-column:2;grid-row:2;text-align:right}.stock .datecol{grid-column:1 / -1;grid-row:3;display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid #27334b;padding-top:9px}.pct-label{display:block;color:#71849e;font-size:11px;font-weight:400;margin-bottom:2px}.pct{font-size:16px}.timestamp{font-size:11px}.source{margin:0}.controls{align-items:flex-start}.price{font-size:21px}}
 @media(max-width:420px){.m-value{font-size:19px}.m-label{font-size:11px}.metric{padding:12px}.logo{width:38px;height:38px}.live{padding:7px 10px}.controls-left{gap:6px}.btn,.select,.toggle{padding:8px 10px;font-size:12px}.count{width:100%;margin:3px 0}}
+
+.asia-panel{margin-top:36px;border-top:1px solid #273952;padding-top:26px}
+.asia-hd{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.asia-eyebrow{font-size:11px;color:#7aaeff;font-weight:800;letter-spacing:.12em}
+.asia-title{font-size:22px;margin:4px 0 0;line-height:1.3}
+.asia-desc{font-size:13px;color:#96a7c1;line-height:1.7;margin:0 0 17px}
+.region-hd{padding:11px 20px;border-top:1px solid #273a55;background:#152138;color:#bad0ea;font-size:13px;font-weight:750}
+.region-hd:first-child{border-top:0}
+.region-meta{margin-left:9px;color:#8199ba;font-size:11px;font-weight:400}
+.region-chip{display:inline-block;margin-left:8px;padding:1px 6px;background:#172d49;color:#83adf1;border:1px solid #2e4e73;border-radius:5px;font-weight:500;font-size:10px;vertical-align:3px}
+@media(max-width:800px){.asia-panel{padding-top:22px;margin-top:28px}.asia-title{font-size:20px}.region-hd{padding:10px 16px}}
 </style></head>
 <body><main class="wrap">
 <header class="top"><div class="identity"><div class="logo">↗</div><div><div class="kicker">MARKET MONITOR / US</div><h1>美股行情监控</h1></div></div><div class="live"><span class="pulse"></span><span id="state">正在连接 Google Finance</span></div></header>
@@ -56,6 +67,17 @@ h1{font-size:22px;line-height:1.3;margin:3px 0 0;letter-spacing:-.035em}
 <div class="board"><div class="thead"><span>股票</span><span>最新价 USD</span><span>较昨收</span><span>较开盘</span><span>报价时间 · 美东</span></div><div id="rows"></div></div>
 <div class="status" id="status">首次加载可能需要数秒。</div>
 <p class="notice">数据仅来自 Google Finance 公开网页，并非官方实时行情 API。<strong>较昨收</strong>是常规交易时段相对上一交易日收盘的变化；<strong>较开盘</strong> = (最新价 ÷ 当日开盘价 − 1) × 100%。不把盘后价格和常规时段涨跌幅混合。若某只抓取失败，会明确标注，不以旧数据冒充实时行情。</p>
+<section class="asia-panel" aria-labelledby="asia-title">
+ <div class="asia-hd"><div><div class="asia-eyebrow">ASIA / LINKED EQUITIES</div><h2 class="asia-title" id="asia-title">亚洲关联股行情</h2></div><div class="live"><span class="pulse"></span><span id="asia-state">等待亚洲行情</span></div></div>
+ <p class="asia-desc">韩国、日本、台湾、中国各 3 只，对应你的 MU、NVDA、AMD、AMAT、TSM 等美股持仓。按当地币种显示行情和交易所时间；休市时保留最后一个交易日的报价时间。</p>
+ <div class="controls"><div class="controls-left">
+   <span class="count">亚洲股票 <small id="asia-count">12只</small></span>
+   <select class="select" id="asia-filter" aria-label="地区筛选"><option value="all">全部地区</option><option value="韩国">韩国</option><option value="日本">日本</option><option value="台湾">台湾</option><option value="中国">中国</option></select>
+   <select class="select" id="asia-sort" aria-label="排序"><option value="default">按原顺序</option><option value="close">按较昨收排序</option><option value="open">按较开盘排序</option></select>
+ </div><button id="asia-refresh" class="btn">⟳ 更新亚洲行情</button></div>
+ <div class="board"><div class="thead"><span>地区 / 股票</span><span>最新价（当地币种）</span><span>较昨收</span><span>较开盘</span><span>报价时间 · 交易所当地</span></div><div id="asia-rows"><div class="region-hd">亚洲行情加载中……</div></div></div>
+ <div class="status" id="asia-status">正在获取 Google Finance 行情。</div>
+</section>
 <footer class="footer"><span>Built for your portfolio · Google Finance</span><span id="last">尚未刷新</span></footer>
 </main>
 <script>
@@ -113,4 +135,5 @@ $('amat').checked=localStorage.getItem('showAMAT')==='1';
 $('rows').innerHTML=Array.from({length:8},(_,i)=>'<div class="stock"><div class="namecol"><div class="symbol">'+codes[i]+'</div><div class="stockname">加载中…</div></div><div class="pricecol"><div class="loading-skeleton"></div></div></div>').join('');
 schedule();load();
 </script>
+<script src="/asia.js"></script>
 </body></html>
