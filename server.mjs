@@ -12,12 +12,26 @@ const stocks=[
   ['JNJ','强生','NYSE','医疗保健'],['LLY','礼来','NYSE','医药'],
   ['AMAT','应用材料','NASDAQ','半导体设备']
 ];
+const asiaStocks=[
+  ['000660','SK海力士','KRX','存储 / HBM','韩国','KRW'],
+  ['005930','三星电子','KRX','存储 / HBM','韩国','KRW'],
+  ['042700','韩美半导体','KRX','HBM 封装设备','韩国','KRW'],
+  ['285A','铠侠','TYO','NAND 存储','日本','JPY'],
+  ['8035','东京电子','TYO','半导体设备','日本','JPY'],
+  ['6857','Advantest','TYO','AI 芯片测试','日本','JPY'],
+  ['2330','台积电','TPE','先进晶圆代工','台湾','TWD'],
+  ['3711','日月光投控','TPE','先进封装','台湾','TWD'],
+  ['2317','鸿海','TPE','AI 服务器','台湾','TWD'],
+  ['002371','北方华创','SHE','半导体设备','中国','CNY'],
+  ['0981','中芯国际H','HKG','晶圆代工','中国','HKD'],
+  ['301308','江波龙','SHE','存储模组','中国','CNY']
+];
 const store=new Map(),CACHE_MS=45000;
-const num=s=>Number(String(s||'').replace(/[$,]/g,'').trim());
+const num=s=>Number(String(s??'').replace(/[^0-9.+-]/g,''));
 const plain=s=>String(s||'').replace(/<[^>]*>/g,'').replace(/&nbsp;|&#160;/gi,' ').trim();
 const quoteUrl=([symbol,,exchange])=>`https://www.google.com/finance/quote/${symbol}:${exchange}?hl=en`;
 function parseQuote(html,stock){
-  const [symbol,name,exchange,sector]=stock;
+  const [symbol,name,exchange,sector,region,currency]=stock;
   const at=html.indexOf('class="N6SYTe"');
   if(at<0)throw Error('Google Finance 页面结构变化，未找到报价');
   const block=html.slice(at,at+4000);
@@ -32,7 +46,7 @@ function parseQuote(html,stock){
   const opening=html.match(/class="SwQK7"[^>]*>\s*Open\s*<\/div>\s*<div[^>]*class="dO6ijd"[^>]*>([\s\S]*?)<\/div>/);
   const open=opening?num(plain(opening[1])):NaN;
   if(!Number.isFinite(price)||price<=0||!Number.isFinite(closePct)||Math.abs(closePct)>100||!Number.isFinite(open)||open<=0||!quoteTime)throw Error('行情字段验证失败，不展示不完整数据');
-  return {symbol,name,exchange,sector,price,open,
+  return {symbol,name,exchange,sector,region:region||'美国',currency:currency||'USD',price,open,
     vsClose:Number(closePct.toFixed(2)),
     vsOpen:Number(((price/open-1)*100).toFixed(2)),
     quoteTime,source:quoteUrl(stock)};
@@ -52,10 +66,10 @@ async function getOne(stock){
     return {...value,status:'ok',fetchedAt:new Date().toISOString()};
   }catch(e){
     if(last&&now-last.fetched<10*60*1000)return {...last.value,status:'stale',warning:'抓取失败，使用10分钟内缓存',fetchedAt:new Date(last.fetched).toISOString()};
-    return {symbol,name,exchange,sector,status:'error',error:String(e.message||e),source:quoteUrl(stock)};
+    return {symbol,name,exchange,sector,region:stock[4]||'美国',currency:stock[5]||'USD',status:'error',error:String(e.message||e),source:quoteUrl(stock)};
   }
 }
-let work;
+let work,asiaWork;
 async function getAll(){
   if(work)return work;
   work=(async()=>{
@@ -65,12 +79,22 @@ async function getAll(){
   })().finally(()=>work=null);
   return work;
 }
+async function getAsia(){
+  if(asiaWork)return asiaWork;
+  asiaWork=(async()=>{
+    let next=0;const values=new Array(asiaStocks.length);
+    await Promise.all(Array.from({length:4},async()=>{while(next<asiaStocks.length){const i=next++;values[i]=await getOne(asiaStocks[i]);}}));
+    return {provider:'Google Finance 公开网页',fetchedAt:new Date().toISOString(),quotes:values};
+  })().finally(()=>{asiaWork=null;});
+  return asiaWork;
+}
 http.createServer(async(req,res)=>{
   const pathname=new URL(req.url||'/', 'http://localhost').pathname;
   const json=(status,data)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'});res.end(JSON.stringify(data));};
   if(req.method!=='GET')return json(405,{error:'Method not allowed'});
-  if(pathname==='/api/health')return json(200,{ok:true,count:stocks.length});
-  if(pathname==='/api/quotes'){try{return json(200,await getAll());}catch{return json(503,{error:'行情抓取暂不可用'});}}
+  if(pathname==='/api/health')return json(200,{ok:true,count:stocks.length+asiaStocks.length,usCount:stocks.length,asiaCount:asiaStocks.length});
+  if(pathname==='/api/quotes'){try{return json(200,await getAll());}catch{return json(503,{error:'美股行情抓取暂不可用'});}}
+  if(pathname==='/api/asia'){try{return json(200,await getAsia());}catch{return json(503,{error:'亚洲行情抓取暂不可用'});}}
   if(pathname==='/'||pathname==='/index.html'){
     try{const content=await readFile(path.join(ROOT,'public','index.html'));res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-cache','x-content-type-options':'nosniff'});res.end(content);}
     catch{res.writeHead(500);res.end('Page unavailable');}
