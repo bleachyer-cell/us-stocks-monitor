@@ -2,6 +2,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { chartProbe } from './chart-probe.mjs';
 
 const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const PORT=Number(process.env.PORT||3000);
@@ -95,6 +96,7 @@ http.createServer(async(req,res)=>{
   if(pathname==='/api/health')return json(200,{ok:true,count:stocks.length+asiaStocks.length,usCount:stocks.length,asiaCount:asiaStocks.length});
   if(pathname==='/api/quotes'){try{return json(200,await getAll());}catch{return json(503,{error:'美股行情抓取暂不可用'});}}
   if(pathname==='/api/asia'){try{return json(200,await getAsia());}catch{return json(503,{error:'亚洲行情抓取暂不可用'});}}
+  if(pathname==='/api/chart-probe'){const symbol=new URL(req.url,'http://localhost').searchParams.get('symbol')||'NVDA';const matched=[...stocks,...asiaStocks].find(x=>x[0]===symbol);if(!matched)return json(400,{error:'Unsupported symbol'});try{return json(200,await chartProbe(matched[0],matched[2]));}catch(e){return json(503,{error:String(e)});}}
   if(pathname==='/asia.js'){
     try{const content=await readFile(path.join(ROOT,'public','asia.js'));res.writeHead(200,{'content-type':'application/javascript; charset=utf-8','cache-control':'no-cache','x-content-type-options':'nosniff'});res.end(content);}
     catch{res.writeHead(500);res.end('Asia script unavailable');}
