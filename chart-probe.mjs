@@ -2,7 +2,7 @@ const RPC="https://www.google.com/finance/_/GoogleFinanceUi/data/batchexecute";
 const HEADERS={"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36","Accept-Language":"en-US,en;q=0.9","Content-Type":"application/x-www-form-urlencoded;charset=UTF-8","Cookie":"CONSENT=YES+"};
 function buildBody(symbol,exchange,mode){
   const tuple=[null,[symbol,exchange]];
-  return "f.req="+encodeURIComponent(JSON.stringify([[["AiCwsd",JSON.stringify([[[tuple]],mode]),null,"1"]]]));
+  return "f.req="+encodeURIComponent(JSON.stringify([[["AiCwsd",JSON.stringify([[tuple],mode]),null,"1"]]]));
 }
 function parseRpc(s){
   const rows=s.split("\n");
