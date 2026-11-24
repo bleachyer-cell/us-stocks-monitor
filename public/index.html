@@ -88,7 +88,6 @@ h1{font-size:22px;line-height:1.3;margin:3px 0 0;letter-spacing:-.035em}
 </div>
 <div class="controls">
   <div class="controls-left"><span class="count">行情列表 <small id="count">8 只</small></span>
-    <label class="toggle"><input id="amat" type="checkbox">加入 AMAT</label>
     <select id="sort" class="select" aria-label="股票排序"><option value="order">按仓位顺序</option><option value="close">按昨收涨跌幅</option><option value="open">按开盘涨跌幅</option><option value="symbol">按代码</option></select>
   </div>
   <div class="controls-left"><select id="interval" class="select" aria-label="刷新频率"><option value="30">每 30 秒</option><option value="60" selected>每 60 秒</option><option value="120">每 120 秒</option></select><button class="btn primary" id="refresh">⟳ 立即刷新</button></div>
@@ -98,7 +97,7 @@ h1{font-size:22px;line-height:1.3;margin:3px 0 0;letter-spacing:-.035em}
 <p class="notice">数据仅来自 Google Finance 公开网页，并非官方实时行情 API。<strong>较昨收</strong>是常规交易时段相对上一交易日收盘的变化；<strong>较开盘</strong> = (最新价 ÷ 当日开盘价 − 1) × 100%。不把盘后价格和常规时段涨跌幅混合。若某只抓取失败，会明确标注，不以旧数据冒充实时行情。</p>
 <section class="asia-panel" aria-labelledby="asia-title">
  <div class="asia-hd"><div><div class="asia-eyebrow">ASIA / LINKED EQUITIES</div><h2 class="asia-title" id="asia-title">亚洲关联股行情</h2></div><div class="live"><span class="pulse"></span><span id="asia-state">等待亚洲行情</span></div></div>
- <p class="asia-desc">韩国、日本、台湾、中国各 3 只，对应你的 MU、NVDA、AMD、AMAT、TSM 等美股持仓。按当地币种显示行情和交易所时间；休市时保留最后一个交易日的报价时间。</p>
+ <p class="asia-desc">韩国、日本、台湾、中国各 3 只，对应你的 MU、NVDA、AMD、TSM 等美股持仓。按当地币种显示行情和交易所时间；休市时保留最后一个交易日的报价时间。</p>
  <div class="controls"><div class="controls-left">
    <span class="count">亚洲股票 <small id="asia-count">12只</small></span>
    <select class="select" id="asia-filter" aria-label="地区筛选"><option value="all">全部地区</option><option value="韩国">韩国</option><option value="日本">日本</option><option value="台湾">台湾</option><option value="中国">中国</option></select>
@@ -110,7 +109,7 @@ h1{font-size:22px;line-height:1.3;margin:3px 0 0;letter-spacing:-.035em}
 <footer class="footer"><span>Built for your portfolio · Google Finance</span><span id="last">尚未刷新</span></footer>
 </main>
 <script>
-const codes=['TSM','AMD','NVDA','TQQQ','MU','SPY','JNJ','LLY','AMAT'];
+const codes=['TSM','AMD','NVDA','QQQ','MU','KO','JNJ','LLY'];
 const $=id=>document.getElementById(id);
 const htmlsafe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let records=[],busy=false,task;
@@ -127,7 +126,7 @@ const display=q=>{
   '<div class="datecol"><div><div class="timestamp">'+htmlsafe(q.quoteTime)+'</div><div class="stamptext '+(warn?'warn':'')+'">'+(warn?'⚠ 抓取失败，显示缓存报价':'Google Finance · 常规时段')+'</div></div><a class="source" href="'+htmlsafe(q.source)+'" rel="noopener noreferrer" target="_blank">来源 ↗</a></div></div>';
 };
 function draw(){
- let all=records.filter(q=>q.symbol!=='AMAT'||$('amat').checked);
+ let all=records.filter(q=>codes.includes(q.symbol));
  const order=$('sort').value;
  if(order==='close')all.sort((a,b)=>(b.vsClose??-999)-(a.vsClose??-999));
  else if(order==='open')all.sort((a,b)=>(b.vsOpen??-999)-(a.vsOpen??-999));
@@ -158,9 +157,7 @@ async function load(){
  finally{busy=false;$('refresh').disabled=false;}
 }
 function schedule(){clearInterval(task);task=setInterval(()=>{if(document.visibilityState!=='hidden')load()},Number($('interval').value)*1000);}
-$('amat').addEventListener('change',()=>{localStorage.setItem('showAMAT',$('amat').checked?'1':'0');draw()});
 $('sort').addEventListener('change',draw);$('interval').addEventListener('change',schedule);$('refresh').addEventListener('click',load);
-$('amat').checked=localStorage.getItem('showAMAT')==='1';
 $('rows').innerHTML=Array.from({length:8},(_,i)=>'<div class="stock"><div class="namecol"><div class="symbol">'+codes[i]+'</div><div class="stockname">加载中…</div></div><div class="pricecol"><div class="loading-skeleton"></div></div></div>').join('');
 schedule();load();
 </script>
