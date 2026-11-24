@@ -8,10 +8,9 @@ const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const PORT=Number(process.env.PORT||3000);
 const stocks=[
   ['TSM','台积电','NYSE','芯片制造'],['AMD','AMD','NASDAQ','AI / CPU'],
-  ['NVDA','英伟达','NASDAQ','AI GPU'],['TQQQ','TQQQ','NASDAQ','3 倍纳指 ETF'],
-  ['MU','美光科技','NASDAQ','存储 / HBM'],['SPY','SPY','NYSEARCA','标普 500 ETF'],
-  ['JNJ','强生','NYSE','医疗保健'],['LLY','礼来','NYSE','医药'],
-  ['AMAT','应用材料','NASDAQ','半导体设备']
+  ['NVDA','英伟达','NASDAQ','AI GPU'],['QQQ','QQQ','NASDAQ','纳斯达克100 ETF'],
+  ['MU','美光科技','NASDAQ','存储 / HBM'],['KO','可口可乐','NYSE','消费品'],
+  ['JNJ','强生','NYSE','医疗保健'],['LLY','礼来','NYSE','医药']
 ];
 const asiaStocks=[
   ['000660','SK海力士','KRX','存储 / HBM','韩国','KRW'],
